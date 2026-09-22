@@ -59,25 +59,30 @@ public:
         return a * d - b * c;
     }
 
-    void calc_Dodgson_det() {
-        while(det_matrix.size() > 1){
+    int calc_Dodgson_det() {
+        while(det_matrix.size() > 0){
+            cout << "main_matrix\n";
             print_matrix(main_matrix);
+            cout << "det_matrix\n";
+            print_matrix(det_matrix);
+            VV tmp_main(n-1, vector<int>(n-1, 0));
             for (int i = 0; i < n-1; i++) {
                 for (int j = 0; j < n-1; j++) {
-                    main_matrix[i][j] = (calc_2minor_det(i,j) / det_matrix[i][j]);
+                    tmp_main[i][j] = (calc_2minor_det(i,j) / det_matrix[i][j]);
                 }
             }
-            VV tmp(n-2, vector<int>(n-2, 0));
+
+            VV tmp_det(n-2, vector<int>(n-2, 0));
             for (int i = 1; i < n-1; i++) {
                 for (int j = 1; j < n-1; j++) {
-                    tmp[i-1][j-1] = main_matrix[i][j] ;
+                    tmp_det[i-1][j-1] = main_matrix[i][j];
                 }
             }
-            det_matrix = tmp;
+            main_matrix = tmp_main;
+            det_matrix = tmp_det;
             n--;
-
         }
-
+        return main_matrix[0][0];
     }
 };
 
@@ -93,9 +98,9 @@ int main() {
         }
     }
     BiMatrix bm = BiMatrix(vv);
-    bm.calc_Dodgson_det();
+    cout << bm.calc_Dodgson_det() << '\n';
 
     cout << "------------------\n";
-    print_matrix(bm.getDetMatrix());
+    print_matrix(bm.getMainMatrix());
 
 }
