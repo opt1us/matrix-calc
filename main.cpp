@@ -8,26 +8,6 @@ using namespace std;
 typedef vector<vector<int>> VV;
 typedef pair<int, int> P;
 
-class BiMatrix {
-    int n;
-    VV main_matrix;
-    VV det_matrix;
-
-public:
-    BiMatrix(const VV &main_matrix) {
-        this->n = main_matrix.size();
-        this->main_matrix = main_matrix;
-        this->det_matrix = VV(n - 1, vector<int>(n - 1, 1));
-    }
-
-    double calc_minor_det(P c1, unsigned int n) {
-
-    }
-};
-
-
-
-
 
 void print_matrix(VV vv) {
     for (int i = 0; i < vv.size(); i++) {
@@ -37,6 +17,34 @@ void print_matrix(VV vv) {
         cout << '\n';
     }
 }
+
+
+class BiMatrix {
+    int n;
+    VV origin_matrix;
+    VV main_matrix;
+    VV det_matrix;
+
+public:
+    BiMatrix(const VV &origin_matrix): origin_matrix(origin_matrix) {
+        this->n = this->main_matrix.size();
+        this->main_matrix = this->origin_matrix;
+        this->det_matrix = VV(n - 1, vector<int>(n - 1, 1));
+    }
+
+    // 0-index
+    int calc_2minor_det(P c1) {
+        int a = main_matrix[c1.first][c1.second];
+        int b = main_matrix[c1.first][c1.second + 1];
+        int c = main_matrix[c1.first + 1][c1.second];
+        int d = main_matrix[c1.first + 1][c1.second + 1];
+        return a * d - b * c;
+    }
+
+    double calc_Dodgson_det() {
+
+    }
+};
 
 
 int main() {
