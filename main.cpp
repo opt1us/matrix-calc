@@ -19,15 +19,6 @@ void print_matrix(VV vv) {
     cout << '\n';
 }
 
-void print_BiMatrix(VV vv) {
-    for (int i = 0; i < vv.size(); i++) {
-        for (int j = 0; j < vv.size(); j++) {
-            cout << setw(3) << vv[i][j] << ' ';
-        }
-        cout << '\n';
-    }
-}
-
 
 class BiMatrix {
     int n;
@@ -61,10 +52,7 @@ public:
 
     int calc_Dodgson_det() {
         while(det_matrix.size() > 0){
-            cout << "main_matrix\n";
-            print_matrix(main_matrix);
-            cout << "det_matrix\n";
-            print_matrix(det_matrix);
+            print_BiMatrix();
             VV tmp_main(n-1, vector<int>(n-1, 0));
             for (int i = 0; i < n-1; i++) {
                 for (int j = 0; j < n-1; j++) {
@@ -84,8 +72,27 @@ public:
         }
         return main_matrix[0][0];
     }
-};
 
+    void print_BiMatrix() {
+        cout << "bi\n";
+        for (int i = 0; i < main_matrix.size() - 1; i++) {
+            for (int j = 0; j < main_matrix.size(); j++) {
+                cout << setw(5) << main_matrix[i][j] << ' ';
+            }
+            cout << "\033[35m";
+            cout << '\n' << "   ";
+            for (int j = 0; j < det_matrix.size(); j++) {
+                cout << setw(5) << det_matrix[i][j] << ' ';
+            }
+            cout << "\033[37m";
+            cout << '\n';
+        }
+        for (int j = 0; j < main_matrix.size(); j++) {
+            cout << setw(5) << main_matrix[main_matrix.size() - 1][j] << ' ';
+        }
+        cout << "\n\n";
+    }
+};
 
 int main() {
     ifstream in("1.txt");
