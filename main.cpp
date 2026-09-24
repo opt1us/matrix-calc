@@ -7,7 +7,10 @@
 
 using namespace std;
 
-typedef vector<vector<double>> VV;
+template<typename T>
+using VVt = vector<vector<T>>;
+
+using VV = VVt<double>;
 
 
 void print_matrix(VV vv) {
@@ -94,6 +97,46 @@ public:
                 for (int j = 0; j < nn - 1; j++) {
                     if (i == 0) {
                         tmp_main[i][j] = calc_2minor_det(0, i + 1, 0, j + 1) / pow(a, nn-2);
+                    }
+                    else {
+                        tmp_main[i][j] = calc_2minor_det(0, i + 1, 0, j + 1);
+                    }
+
+                }
+            }
+            main_matrix = tmp_main;
+        }
+        cout << main_matrix[0][0] << '\n';
+        return main_matrix[0][0];
+    }
+
+    auto calc_common_Chio_det(int k) {
+        while (main_matrix.size() > 1) {
+            int nn = main_matrix.size();
+            int[] r = new int[k];
+            int[] c = new int[k];
+            for (int i = 0; i < k; i++) {
+                cin >> r[i];
+            }
+            for (int i = 0; i < k; i++) {
+                cin >> c[i];
+            }
+            VV minor_matrix(k, vector<double>(k, 0));
+            for (int i = 0; i < k; i++) {
+                for (int j = 0; j < k; j++) {
+                    minor_matrix[i][j] = main_matrix[r[i]][c[j]];
+                }
+            }
+            BiMatrix bminor_matrix = BiMatrix(minor_matrix);
+            if (k != 1) {
+                double minor_det = bminor_matrix.calc_common_Chio_det(1);
+            }
+            print_matrix(main_matrix);
+            VV tmp_main(nn - k, vector<double>(nn - k, 0));
+            for (int i = 0; i < nn - 1; i++) {
+                for (int j = 0; j < nn - 1; j++) {
+                    if (i == 0) {
+                        tmp_main[i][j] = calc_2minor_det(0, i + 1, 0, j + 1) / pow(minor_det, nn-k-1);
                     }
                     else {
                         tmp_main[i][j] = calc_2minor_det(0, i + 1, 0, j + 1);
