@@ -2,11 +2,12 @@
 #include<fstream>
 #include<vector>
 #include<iomanip>
+#include<math.h>
 
 
 using namespace std;
 
-typedef vector<vector<int>> VV;
+typedef vector<vector<double>> VV;
 
 
 void print_matrix(VV vv) {
@@ -30,7 +31,7 @@ public:
     BiMatrix(const VV &origin_matrix): origin_matrix(origin_matrix) {
         this->n = this->origin_matrix.size();
         this->main_matrix = this->origin_matrix;
-        this->det_matrix = VV(n - 1, vector<int>(n - 1, 1));
+        this->det_matrix = VV(n - 1, vector<double>(n - 1, 1));
     }
 
     VV getDetMatrix(){
@@ -42,25 +43,34 @@ public:
     }
 
     // 0-index
-    int calc_2minor_det(int x, int y) {
-        int a = main_matrix[x][y];
-        int b = main_matrix[x][y + 1];
-        int c = main_matrix[x + 1][y];
-        int d = main_matrix[x + 1][y + 1];
+    auto calc_2minor_det(int row, int col) {
+        auto a = main_matrix[row][col];
+        auto b = main_matrix[row][col + 1];
+        auto c = main_matrix[row + 1][col];
+        auto d = main_matrix[row + 1][col + 1];
         return a * d - b * c;
     }
 
-    int calc_Dodgson_det() {
+    // 0-index
+    auto calc_2minor_det(int r1, int r2, int c1, int c2) {
+        auto a = main_matrix[r1][c1];
+        auto b = main_matrix[r1][c2];
+        auto c = main_matrix[r2][c1];
+        auto d = main_matrix[r2][c2];
+        return a * d - b * c;
+    }
+
+    auto calc_Dodgson_det() {
         while(det_matrix.size() > 0){
             print_BiMatrix();
-            VV tmp_main(n-1, vector<int>(n-1, 0));
+            VV tmp_main(n-1, vector<double>(n-1, 0));
             for (int i = 0; i < n-1; i++) {
                 for (int j = 0; j < n-1; j++) {
                     tmp_main[i][j] = (calc_2minor_det(i,j) / det_matrix[i][j]);
                 }
             }
 
-            VV tmp_det(n-2, vector<int>(n-2, 0));
+            VV tmp_det(n-2, vector<double>(n-2, 0));
             for (int i = 1; i < n-1; i++) {
                 for (int j = 1; j < n-1; j++) {
                     tmp_det[i-1][j-1] = main_matrix[i][j];
@@ -70,6 +80,30 @@ public:
             det_matrix = tmp_det;
             n--;
         }
+        return main_matrix[0][0];
+    }
+
+    auto calc_Chio_det() {
+        while (main_matrix.size() > 1) {
+            int nn = main_matrix.size();
+            double a = main_matrix[0][0];
+            cout << "\033[32m" << a << "    " << "\033[37m" << '\n';
+            print_matrix(main_matrix);
+            VV tmp_main(nn - 1, vector<double>(nn - 1, 0));
+            for (int i = 0; i < nn - 1; i++) {
+                for (int j = 0; j < nn - 1; j++) {
+                    if (i == 0) {
+                        tmp_main[i][j] = calc_2minor_det(0, i + 1, 0, j + 1) / pow(a, nn-2);
+                    }
+                    else {
+                        tmp_main[i][j] = calc_2minor_det(0, i + 1, 0, j + 1);
+                    }
+
+                }
+            }
+            main_matrix = tmp_main;
+        }
+        cout << main_matrix[0][0] << '\n';
         return main_matrix[0][0];
     }
 
@@ -98,7 +132,7 @@ int main() {
     ifstream in("1.txt");
     int n = 0;
     in >> n;
-    VV vv(n, vector<int>(n, 0));
+    VV vv(n, vector<double>(n, 0));
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             in >> vv[i][j];
@@ -108,6 +142,12 @@ int main() {
     cout << bm.calc_Dodgson_det() << '\n';
 
     cout << "------------------\n";
-    print_matrix(bm.getMainMatrix());
+    // print_matrix(bm.getMainMatrix());
+
+    cout << "------------------\n";
+    cout << "------------------\n";
+
+    BiMatrix cm = BiMatrix(vv);
+    cm.calc_Chio_det();
 
 }
