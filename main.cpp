@@ -492,11 +492,13 @@ int main() {
     cout << '\n';
 //    cout << "-------------THIRD ORDER BIMATRIX DET-------------\n";
 
-//    cout << "-------------CHIO's METHOD-------------\n";
-
-//    cout << "-------------CHIO'S COMMON METHOD-------------\n";
+    cout << "-------------CHIO's METHOD-------------\n";
+    calc_Chio_det(m1);
 
     cout << "-------------DODGSON'S COMMON METHOD-------------\n";
-    calc_common_Dodgson_det(m1, 1);
+    calc_common_Dodgson_det(m1, 2);
+
+    cout << "-------------CHIO'S COMMON METHOD-------------\n";
+    calc_common_Chio_det(m1, 2);
 
 }
