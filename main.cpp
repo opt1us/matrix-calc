@@ -111,7 +111,15 @@ public:
     }
 
     BiMatrix(const VV &main_matrix, const VV &det_matrix):
-        origin_matrix(main_matrix), main_matrix(main_matrix), det_matrix(det_matrix) {}
+        origin_matrix(main_matrix), main_matrix(main_matrix), det_matrix(det_matrix) {
+            if (this->main_matrix.size() - this->det_matrix.size() != 1) throw new exception;
+        }
+
+    BiMatrix(Matrix matrix) {
+        this->origin_matrix = matrix.getMatrix();
+        this->main_matrix = matrix.getMatrix();
+        this->det_matrix = VV(this->main_matrix.size() - 1, vector<double>(this->main_matrix.size() - 1, 1));
+    }
 
     VV getDetMatrix(){
         return this->det_matrix;
@@ -141,6 +149,108 @@ public:
         return a * d - b * c;
     }
 
+
+    // all det_matrix can't have zero elements
+    // centre element (a[1][1]) can't be zero
+    auto calc_3minor_det(vector<int> r, vector<int> c) {
+        cout << "-------------------->>>\n";
+        cout << "BIMATRIX DET\n";
+        if (r.size() != c.size()) {
+            throw new exception;
+        }
+        VV main_minor(r.size(), vector<double>(c.size(), 0));
+        for (int i = 0; i < r.size(); i++) {
+            for (int j = 0; j < c.size(); j++) {
+                main_minor[i][j] = this->main_matrix[r[i]][c[j]];
+            }
+        }
+        VV det_minor(r.size() - 1, vector<double>(c.size() - 1, 0));
+        for (int i = 0; i < r.size() - 1; i++) {
+            for (int j = 0; j < c.size() - 1; j++) {
+                det_minor[i][j] = this->det_matrix[r[i]][c[j]];
+            }
+        }
+        Matrix a(main_minor);
+        Matrix b(det_minor);
+        BiMatrix bm_minor(main_minor, det_minor);
+        cout << "BIMINOR:\n";
+        bm_minor.print_BiMatrix();
+        if (a.getSize() == 1) {
+            cout << "RESULT: " << a[0][0] << "\n";
+            cout << "<<<--------------------\n";
+            return a[0][0];
+        }
+        if (a.getSize() == 2) {
+            double res = (a[0][0] * a[1][1] - a[0][1] * a[1][0]) / (b[0][0]);
+            cout << "RESULT: " << res << "\n";
+            cout << "<<<--------------------\n";
+            return res;
+        }
+        cout
+            << "(\n"
+            << "    (\n"
+            << "        " << a[0][1] << " * " << a[1][0] << " * "
+                            << a[1][2] << " * " << a[2][1] << "\n"
+            << "        *\n"
+            << "        (" << b[0][0] << " * " << b[1][1]
+                            << " - " << b[0][1] << " * " << b[1][0]
+                            << ") / (-" << a[1][1] << ")\n"
+            << "    )\n"
+            << "    -\n"
+            << "    (\n"
+            << "        + " << a[1][0] << " * (\n"
+            << "            " << a[0][1] << " * " << a[2][2]
+                            << " * " << b[0][1] << " * " << b[1][0] << "\n"
+            << "            - " << a[0][2] << " * " << a[2][1]
+                            << " * " << b[0][0] << " * " << b[1][1] << "\n"
+            << "        )\n"
+            << "        - " << a[1][1] << " * (\n"
+            << "            " << a[0][0] << " * " << a[2][2]
+                            << " * " << b[0][1] << " * " << b[1][0] << "\n"
+            << "            - " << a[0][2] << " * " << a[2][0]
+                            << " * " << b[0][0] << " * " << b[1][1] << "\n"
+            << "        )\n"
+            << "        + " << a[1][2] << " * (\n"
+            << "            " << a[0][0] << " * " << a[2][1]
+                            << " * " << b[0][1] << " * " << b[1][0] << "\n"
+            << "            - " << a[0][1] << " * " << a[2][0]
+                            << " * " << b[0][0] << " * " << b[1][1] << "\n"
+            << "        )\n"
+            << "    )\n"
+            << ")\n"
+            << "/\n"
+            << "(" << b[0][0] << " * " << b[0][1] << " * "
+            << b[1][0] << " * " << b[1][1] << ");\n";
+        double res =
+            (
+                 (
+                    a[0][1] * a[1][0] * a[1][2] * a[2][1]
+                    *
+                    (b[0][0] * b[1][1] - b[0][1] * b[1][0]) / (-a[1][1])
+                 )
+                 -
+                 (
+                    + a[1][0] * (
+                        a[0][1] * a[2][2] * b[0][1] * b[1][0]
+                        - a[0][2] * a[2][1] * b[0][0] * b[1][1]
+                    )
+                    - a[1][1] * (
+                        a[0][0] * a[2][2] * b[0][1] * b[1][0]
+                        - a[0][2] * a[2][0] * b[0][0] * b[1][1]
+                    )
+                    + a[1][2] * (
+                        a[0][0] * a[2][1] * b[0][1] * b[1][0]
+                        - a[0][1] * a[2][0] * b[0][0] * b[1][1]
+                    )
+                 )
+             )
+            /
+            (b[0][0] * b[0][1] * b[1][0] * b[1][1]);
+        cout << "RESULT: " << res << "\n";
+        cout << "<<<--------------------\n";
+        return res;
+    }
+
     void print_BiMatrix() {
         cout << "bi\n";
         for (int i = 0; i < main_matrix.size() - 1; i++) {
@@ -162,10 +272,9 @@ public:
     }
 };
 
-double calc_Dodgson_det(Matrix matrix) {
+double calc_Dodgson_det(BiMatrix biMatrix) {
     cout << "-------------------->>>\n";
     cout << "DODJSON METHOD\n";
-    BiMatrix biMatrix(matrix.getMatrix());
     VV main_matrix = biMatrix.getMainMatrix();
     VV det_matrix = biMatrix.getDetMatrix();
     while(det_matrix.size() > 0){
@@ -287,7 +396,60 @@ double calc_common_Chio_det(Matrix matrix, int k) {
     cout << '\n';
 }
 
-int main() {
+double calc_common_Dodgson_det(BiMatrix bm, int k) {
+    int n = bm.getSize();
+    bm.print_BiMatrix();
+    Matrix bmain(bm.getMainMatrix());
+    Matrix bdet(bm.getDetMatrix());
+    VVt<int> rc_main_minor;
+    for (int i = 0; i < n - k; i++) {
+        vector<int> rc;
+        for (int j = i; j < i + k + 1; j++) {
+            rc.push_back(j);
+        }
+        rc_main_minor.push_back(rc);
+    }
+    VVt<int> rc_det_minor;
+    for (int i = 1; i < n - k; i++) {
+        vector<int> rc;
+        for (int j = i; j < i + k; j++) {
+            rc.push_back(j);
+        }
+        rc_det_minor.push_back(rc);
+    }
+    VV new_main(n - k, vector<double>(n - k));
+    for (int i = 0; i < rc_main_minor.size(); i++) {
+        auto rows = rc_main_minor[i];
+        for (int j = 0; j < rc_main_minor.size(); j++) {
+            auto cols = rc_main_minor[j];
+            cout << "\t  ";
+            print_vec<int>(cols);
+            cout << "\tA\n";
+            cout << "\t  ";
+            print_vec<int>(rows);
+            // bimatrix minor
+            new_main[i][j] = bm.calc_3minor_det(rows, cols);
+        }
+    }
+    VV new_det(n - k - 1, vector<double>(n - k - 1));
+    cout << "rc_det_minor.size()" << rc_det_minor.size() << '\n';
+    for (int i = 0; i < rc_det_minor.size(); i++) {
+        auto rows = rc_det_minor[i];
+        for (int j = 0; j < rc_det_minor.size(); j++) {
+            auto cols = rc_det_minor[j];
+            cout << "\t  ";
+            print_vec<int>(cols);
+            cout << "\tB\n";
+            cout << "\t  ";
+            print_vec<int>(rows);
+            new_det[i][j] = bm.calc_3minor_det(rows, cols);
+        }
+    }
+    BiMatrix new_bm(new_main, new_det);
+    new_bm.print_BiMatrix();
+}
+
+Matrix read_matrix() {
     ifstream in("1.txt");
     int n = 0;
     in >> n;
@@ -297,13 +459,44 @@ int main() {
             in >> vv[i][j];
         }
     }
-    Matrix m1(vv);
+    return Matrix(vv);
+}
+
+
+
+
+BiMatrix read_biMatrix() {
+    ifstream in("1.txt");
+    int n = 0;
+    in >> n;
+    VV main(n, vector<double>(n, 0));
+    VV det(n - 1, vector<double>(n - 1, 0));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            in >> main[i][j];
+        }
+    }
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - 1; j++) {
+            in >> det[i][j];
+        }
+    }
+    return BiMatrix(main, det);
+}
+
+int main() {
+    Matrix m1 = read_matrix();
+    BiMatrix bm1 = read_biMatrix();
     cout << "-------------DODGSON's METHOD-------------\n";
-    calc_Dodgson_det(m1);
+    calc_Dodgson_det(BiMatrix(m1));
     cout << '\n';
-    cout << "-------------CHIO's METHOD-------------\n";
-    Matrix m2(vv);
-    calc_Chio_det(m2);
-    cout << "-------------CHIO'S COMMON METHOD-------------\n";
-    calc_common_Chio_det(m1, 2);
+//    cout << "-------------THIRD ORDER BIMATRIX DET-------------\n";
+
+//    cout << "-------------CHIO's METHOD-------------\n";
+
+//    cout << "-------------CHIO'S COMMON METHOD-------------\n";
+
+    cout << "-------------DODGSON'S COMMON METHOD-------------\n";
+    calc_common_Dodgson_det(m1, 1);
+
 }
