@@ -23,6 +23,17 @@ using namespace std;
 // A3 Три жадных алгоритма для решения задачи о рюкзаке (по макс. цене, по мин. весу, по макс. удельной цене)
 // A4 Решение задачи о рюкзаке при помощи динамического программирования
 
+// Для задачи A1
+vi vg(1, -1);
+
+template<typename T>
+void printv(const vector<T>& v, int pad) {
+    for (T e: v) {
+        cout << setw(pad) << e << ' ';
+    }
+    cout << '\n';
+}
+
 template<typename T>
 void printv(const vector<T>& v) {
     for (T e: v) {
@@ -39,7 +50,8 @@ void printvp(const vector<pair<T, P>>& v) {
     cout << '\n';
 }
 
-void recur(const vi& v, const int& i, const int& s, const int& d, vi vt) {
+void recur(const vi& v, int i, int s, const int& d, vi vt, int vgindx) {
+    vg[vgindx] = s;
     if (s == d) {
         printv(vt);
         cout << s << '\n';
@@ -49,8 +61,8 @@ void recur(const vi& v, const int& i, const int& s, const int& d, vi vt) {
     int sum = accumulate(v.begin() + i, v.end(), s);
     if (s + sum < d || s + v[i] > d) return;
     vt.push_back(i);
-    recur(v, i + 1, s + v[i], d, vt);
-    recur(v, i + 1, s, d, vi(vt.begin(), vt.end() - 1));
+    recur(v, i + 1, s + v[i], d, vt, vgindx * 2);
+    recur(v, i + 1, s, d, vi(vt.begin(), vt.end() - 1), vgindx * 2 + 1);
 }
 
 void solve_A1() {
@@ -69,7 +81,17 @@ void solve_A1() {
     // solving
     cout << "Backtracking solves all subsets sum equal d\n\n";
     vi vt;
-    recur(v, 0, 0, d, vt);
+    vg.resize(1<<(n+1), -1);
+    recur(v, 0, 0, d, vt, 1);
+    for (int i = 0; i < n + 1; i++) {
+        for (int j = (1<<i); j < (1<<(i+1)); j++) {
+            int pad = (1 << ((n + 4) - i));
+            if (j == (1 << i)) pad >>= 1;
+            if (vg[j] > -1) cout << setw(pad) << vg[j];
+            else cout << setw(pad);
+        }
+        cout << '\n';
+    }
 }
 
 void solve_A3() {
