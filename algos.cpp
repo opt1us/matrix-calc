@@ -13,7 +13,7 @@
 // [x] A1 Поиск всех подмножеств (подкортежей) из заданного множества с определенной суммой
 // [ ] A2 Нахождение алфавитного дерева минимальной стоимости (задача расставления скобок, динамическое программирование)
 // [x] A3 Три жадных алгоритма для решения задачи о рюкзаке (по макс. цене, по мин. весу, по макс. удельной цене)
-// [ ] A4 Решение задачи о рюкзаке при помощи динамического программирования
+// [x] A4 Решение задачи о рюкзаке при помощи динамического программирования
 // [ ] A5 Решение задачи о рюкзаке методом ветвей и границ
 
 using namespace std;
@@ -90,8 +90,10 @@ void solve_A1(ifstream& in) {
     // solving
     ofstream out("A1.txt");
     cout << "Backtracking solves all subsets sum equal d\n\n";
+    cout << "Set was sorted: "; printv(v); cout << '\n';
     vi vt;
     vg.resize(1<<(n+1), -1);
+    cout << "Subsets:\n";
     recur(v, 0, 0, d, vt, 1);
     for (int i = 0; i < n + 1; i++) {
         for (int j = (1<<i); j < (1<<(i+1)); j++) {
@@ -245,5 +247,14 @@ int main() {
     string task;
     ifstream in("2.txt");
     in >> task;
-    solve_A4(in);
+    if (task == "A1") {
+        solve_A1(in);
+    }
+    else if (task == "A3") {
+        solve_A3(in);
+    }
+    else if (task == "A4") {
+        solve_A4(in);
+    }
+    else cout << "Function solve_" + task + " doesn't exist\n";
 }
