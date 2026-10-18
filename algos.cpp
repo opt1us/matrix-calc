@@ -79,18 +79,19 @@ void solve_A1() {
     cout << d << '\n';
     sort(v.begin(), v.end());
     // solving
+    ofstream out("bt.txt");
     cout << "Backtracking solves all subsets sum equal d\n\n";
     vi vt;
     vg.resize(1<<(n+1), -1);
     recur(v, 0, 0, d, vt, 1);
     for (int i = 0; i < n + 1; i++) {
         for (int j = (1<<i); j < (1<<(i+1)); j++) {
-            int pad = (1 << ((n + 4) - i));
-            if (j == (1 << i)) pad >>= 1;
-            if (vg[j] > -1) cout << setw(pad) << vg[j];
-            else cout << setw(pad);
+            int pad = (1<<(n + 2 - i));
+            if (j == (1<<i)) pad >>= 1;
+            if (vg[j] != -1) out << setw(pad) << vg[j];
+            else out << setw(pad) << ' ';
         }
-        cout << '\n';
+        out << '\n';
     }
 }
 
