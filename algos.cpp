@@ -7,21 +7,24 @@
 #include<algorithm>
 #include<numeric>
 
-
-#define vi  vector<int>
-#define vd  vector<double>
-#define vpi vector<pair<int, int>>
-#define pii pair<int, int>
-
-using namespace std;
-
 // Условие для всех задач - вывод должен полностью соответствовать стандартному решению в тетради
 // или помогать его воспроизвести
 
-// A1 Поиск всех подмножеств (подкортежей) из заданного множества с определенной суммой
-// A2 Нахождение алфавитного дерева минимальной стоимости (задача расставления скобок, динамическое программирование)
-// A3 Три жадных алгоритма для решения задачи о рюкзаке (по макс. цене, по мин. весу, по макс. удельной цене)
-// A4 Решение задачи о рюкзаке при помощи динамического программирования
+// [x] A1 Поиск всех подмножеств (подкортежей) из заданного множества с определенной суммой
+// [ ] A2 Нахождение алфавитного дерева минимальной стоимости (задача расставления скобок, динамическое программирование)
+// [x] A3 Три жадных алгоритма для решения задачи о рюкзаке (по макс. цене, по мин. весу, по макс. удельной цене)
+// [ ] A4 Решение задачи о рюкзаке при помощи динамического программирования
+// [ ] A5 Решение задачи о рюкзаке методом ветвей и границ
+
+using namespace std;
+
+typedef vector<int> vi;
+typedef vector<double> vd;
+typedef vector<vector<int>> vvi;
+typedef vector<pair<int, int>> vpi;
+typedef pair<int, int> pii;
+
+
 
 // Для задачи A1
 vi vg(1, -1);
@@ -40,6 +43,13 @@ void printv(const vector<T>& v) {
         cout << e << ' ';
     }
     cout << '\n';
+}
+
+template<typename T>
+void printvv(const vector<vector<T>>& vv) {
+    for (auto v: vv) {
+        printv(v, 4);
+    }
 }
 
 template<typename T, typename P>
@@ -65,10 +75,9 @@ void recur(const vi& v, int i, int s, const int& d, vi vt, int vgindx) {
     recur(v, i + 1, s, d, vi(vt.begin(), vt.end() - 1), vgindx * 2 + 1);
 }
 
-void solve_A1() {
+void solve_A1(ifstream& in) {
     int n;
     int d;
-    ifstream in("2.txt");
     in >> n;
     vi v(n);
     for (int i = 0; i < n; i++) {
@@ -79,7 +88,7 @@ void solve_A1() {
     cout << d << '\n';
     sort(v.begin(), v.end());
     // solving
-    ofstream out("bt.txt");
+    ofstream out("A1.txt");
     cout << "Backtracking solves all subsets sum equal d\n\n";
     vi vt;
     vg.resize(1<<(n+1), -1);
@@ -95,10 +104,9 @@ void solve_A1() {
     }
 }
 
-void solve_A3() {
+void solve_A3(ifstream& in) {
     int n;
     int d;
-    ifstream in("2.txt");
     in >> n;
     vpi v(n);
     vpi w(n);
@@ -186,6 +194,56 @@ void solve_A3() {
     }
 }
 
+void solve_A4(ifstream& in) {
+    int n;
+    int d;
+    in >> n;
+    // 1-index
+    vpi v(n+1);
+    vpi w(n+1);
+    for (int i = 1; i <= n; i++) {
+        in >> v[i].second >> w[i].second;
+        v[i].first = w[i].first = i;
+    }
+    in >> d;
+    printvp(v);
+    printvp(w);
+    cout << d << '\n';
+    // solving
+    // i - 1-index
+    vvi table(n + 1, vi(d + 1, 0));
+    for (int i = 1; i <= n; i++) {
+        for (int j = 0; j < table[0].size(); j++) {
+            table[i][j] = max(table[i-1][j], ((j-w[i].second>=0) ? table[i-1][j-w[i].second] : 0) + (w[i].second <= j ? v[i].second : 0));
+        }
+    }
+    cout << "Table of solutions:\n";
+    printvv(table);
+    vi objs;
+    int i = n; // 1-index
+    int j = table[0].size()-1; // 0-index
+    int s = table[i][j];
+    while (s > 0) {
+        if (table[i][j-1] == table[i][j]) {
+            j--;
+        }
+        else if (table[i-1][j] == table[i][j]) {
+            i--;
+        }
+        else {
+            objs.push_back(i);
+            s -= v[i].second;
+            j -= w[i].second;
+            i--;
+        }
+    }
+    cout << "Objects indices: ";
+    printv(objs);
+}
+
 int main() {
-    solve_A1();
+    string task;
+    ifstream in("2.txt");
+    in >> task;
+    solve_A4(in);
 }
